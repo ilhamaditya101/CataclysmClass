@@ -25,7 +25,7 @@ public class XpListener implements Listener {
             return;
         }
 
-        String skill = e.getSkill().getId().toLowerCase(Locale.ROOT);
+        String skill = e.getSkill().getId().toString().toLowerCase(Locale.ROOT);
 
         double m = c.mult(cl, skill);
 
