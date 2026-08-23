@@ -1,17 +1,64 @@
+gui:
+  title: "&8ᴄᴀᴛᴀᴄʟʏsᴍ ᴄʟᴀss"
+  size: 27
+
 classes:
+
   fighter:
-    name: '&cFighter'
-    icon: IRON_SWORD
-    multipliers: { fighting: 1.5, foraging: 1.5, excavation: 1.5 }
+    display-name: "&cFighter"
+    material: "IRON_SWORD"
+    slot: 10
+    group: "fighter"
+
+    lore:
+      - ""
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪɢʜᴛɪɴɢ &e𝟷.𝟻x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴇxᴄᴀᴠᴀᴛɪᴏɴ &e𝟷.𝟻x"
+      - "&𝟽> &ғʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғᴏʀᴀɢɪɴɢ &e1.5x"
+      - ""
+      - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+
   ranger:
-    name: '&aRanger'
-    icon: BOW
-    multipliers: { archery: 1.5, fishing: 1.5, agility: 1.5 }
+    display-name: "&aRanger"
+    material: "BOW"
+    slot: 12
+    group: "ranger"
+
+    lore:
+      - ""
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀʀᴄʜᴇʀʏ &e𝟷.𝟻x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀɢɪʟɪᴛʏ &e𝟷.5x"
+      - "&8> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪsʜɪɴɢ &e1.5x"
+      - ""
+      - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+
   tanker:
-    name: '&9Tanker'
-    icon: SHIELD
-    multipliers: { defense: 1.5, mining: 1.5 }
+    display-name: "&bTanker"
+    material: "SHIELD"
+    slot: 14
+    group: "tanker"
+
+    lore:
+      - ""
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴅᴇғᴇɴsᴇ &e𝟷.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴍɪɴɪɴɢ &e1.5x"
+      - ""
+      - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+
   mage:
-    name: '&5Mage'
-    icon: NETHER_STAR
-    multipliers: { farming: 1.5, enchanting: 1.5, alchemy: 1.5 }
+    display-name: "&5Mage"
+    material: "BLAZE_ROD"
+    slot: 16
+    group: "mage"
+
+    lore:
+      - ""
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғᴀʀᴍɪɴɢ &e1.5x"
+      - "&7> &ғʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴇɴᴄʜᴀɴᴛɪɴɢ &e1.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀʟᴄʜᴇᴍʏ &e1.5x"
+      - ""
+      - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+
+messages:
+  selected: "&cCataclysmClass &fBerhasil memilih class &e{class}&f!"
+  reloaded: "&cCataclysmClass &fConfig berhasil di-reload."
