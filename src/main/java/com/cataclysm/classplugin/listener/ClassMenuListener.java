@@ -33,7 +33,7 @@ public class ClassMenuListener implements Listener {
                 '&',
                 plugin.getConfig().getString(
                         "gui.title",
-                        "&8Cataclysm Class"
+                        "&8ᴄᴀᴛᴀᴄʟʏsᴍ ᴄʟᴀss"
                 )
         );
 
@@ -44,7 +44,36 @@ public class ClassMenuListener implements Listener {
         event.setCancelled(true);
 
         if (event.getRawSlot() < 0 ||
-                event.getRawSlot() >= event.getView().getTopInventory().getSize()) {
+                event.getRawSlot() >= event.getView()
+                        .getTopInventory()
+                        .getSize()) {
+            return;
+        }
+
+        /*
+         * CEK APAKAH PLAYER SUDAH MEMILIKI CLASS
+         */
+        String currentClass = classManager.getClass(player);
+
+        if (currentClass != null) {
+
+            String displayName = plugin.getConfig()
+                    .getString(
+                            "classes." + currentClass + ".display-name",
+                            currentClass
+                    );
+
+            player.sendMessage(
+                    color(
+                            "&cCataclysmClass &fKamu sudah memilih class &e"
+                                    + ChatColor.stripColor(
+                                    color(displayName)
+                            )
+                                    + "&f."
+                    )
+            );
+
+            player.closeInventory();
             return;
         }
 
@@ -72,6 +101,9 @@ public class ClassMenuListener implements Listener {
                             id
                     );
 
+            /*
+             * PILIH CLASS UNTUK PERTAMA KALI
+             */
             classManager.setClass(player, id);
 
             String message = plugin.getConfig()
@@ -83,23 +115,24 @@ public class ClassMenuListener implements Listener {
             message = message.replace(
                     "{class}",
                     ChatColor.stripColor(
-                            ChatColor.translateAlternateColorCodes(
-                                    '&',
-                                    displayName
-                            )
+                            color(displayName)
                     )
             );
 
             player.sendMessage(
-                    ChatColor.translateAlternateColorCodes(
-                            '&',
-                            message
-                    )
+                    color(message)
             );
 
             player.closeInventory();
 
             return;
         }
+    }
+
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes(
+                '&',
+                text
+        );
     }
 }
