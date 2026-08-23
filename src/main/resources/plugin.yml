@@ -1,71 +1,20 @@
-package com.cataclysm.classplugin;
+name: CataclysmClass
+version: 1.0.0
+main: com.cataclysm.classplugin.CataclysmClassPlugin
+api-version: '1.20'
 
-import com.cataclysm.classplugin.command.CCYCommand;
-import com.cataclysm.classplugin.command.ClassCommand;
-import com.cataclysm.classplugin.gui.ClassMenu;
-import com.cataclysm.classplugin.listener.ClassMenuListener;
-import com.cataclysm.classplugin.manager.ClassManager;
+depend:
+  - LuckPerms
 
-import net.luckperms.api.LuckPerms;
+commands:
+  class:
+    description: Open Cataclysm Class menu
+    usage: /class
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
+  cclass:
+    description: CataclysmClass admin command
+    usage: /cclass reload
 
-public class CataclysmClassPlugin extends JavaPlugin {
-
-    private LuckPerms luckPerms;
-    private ClassManager classManager;
-    private ClassMenu classMenu;
-
-    @Override
-    public void onEnable() {
-
-        saveDefaultConfig();
-
-        RegisteredServiceProvider<LuckPerms> provider =
-                Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-
-        if (provider == null) {
-            getLogger().severe("LuckPerms tidak ditemukan!");
-            getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        luckPerms = provider.getProvider();
-
-        classManager = new ClassManager(this, luckPerms);
-        classMenu = new ClassMenu(this);
-
-        if (getCommand("class") != null) {
-            getCommand("class").setExecutor(
-                    new ClassCommand(classMenu)
-            );
-        }
-
-        if (getCommand("cclass") != null) {
-            getCommand("cclass").setExecutor(
-                    new CCYCommand(this)
-            );
-        }
-
-        Bukkit.getPluginManager().registerEvents(
-                new ClassMenuListener(this, classManager),
-                this
-        );
-
-        getLogger().info("CataclysmClass enabled!");
-    }
-
-    public ClassManager getClassManager() {
-        return classManager;
-    }
-
-    public ClassMenu getClassMenu() {
-        return classMenu;
-    }
-
-    public LuckPerms getLuckPerms() {
-        return luckPerms;
-    }
-}
+permissions:
+  cataclysmclass.admin:
+    default: op
