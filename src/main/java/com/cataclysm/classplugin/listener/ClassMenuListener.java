@@ -1,111 +1,129 @@
-package com.cataclysm.classplugin.manager;
+package com.cataclysm.classplugin.listener;
 
 import com.cataclysm.classplugin.CataclysmClassPlugin;
+import com.cataclysm.classplugin.manager.ClassManager;
 
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.model.user.User;
-import net.luckperms.api.node.Node;
-
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.HashSet;
-import java.util.Set;
-
-public class ClassManager {
+public class ClassMenuListener implements Listener {
 
     private final CataclysmClassPlugin plugin;
-    private final LuckPerms luckPerms;
+    private final ClassManager classManager;
 
-    public ClassManager(
+    public ClassMenuListener(
             CataclysmClassPlugin plugin,
-            LuckPerms luckPerms
+            ClassManager classManager
     ) {
         this.plugin = plugin;
-        this.luckPerms = luckPerms;
+        this.classManager = classManager;
     }
 
-    public void setClass(Player player, String classId) {
+    @EventHandler
+    public void onClick(InventoryClickEvent event) {
 
-        String newGroup = plugin.getConfig()
-                .getString("classes." + classId + ".group");
-
-        if (newGroup == null || newGroup.isEmpty()) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
 
-        User user = luckPerms.getUserManager()
-                .getUser(player.getUniqueId());
-
-        if (user == null) {
-            return;
-        }
-
-        /*
-         * PERMANENT CLASS:
-         * Kalau player sudah punya salah satu class,
-         * jangan izinkan set class lagi.
-         */
-        if (getClass(player) != null) {
-            return;
-        }
-
-        /*
-         * Tambahkan group class.
-         */
-        user.data().add(
-                Node.builder("group." + newGroup).build()
+        String title = ChatColor.translateAlternateColorCodes(
+                '&',
+                plugin.getConfig().getString(
+                        "gui.title",
+                        "&8ᴄᴀᴛᴀᴄʟʏsᴍ ᴄʟᴀss"
+                )
         );
 
-        luckPerms.getUserManager().saveUser(user);
-    }
+        if (!event.getView().getTitle().equals(title)) {
+            return;
+        }
 
-    public String getClass(Player player) {
+        event.setCancelled(true);
 
-        User user = luckPerms.getUserManager()
-                .getUser(player.getUniqueId());
+        if (event.getRawSlot() < 0 ||
+                event.getRawSlot() >= event.getView()
+                        .getTopInventory()
+                        .getSize()) {
+            return;
+        }
 
-        if (user == null) {
-            return null;
+        /*
+         * SUDAH PUNYA CLASS?
+         */
+        String currentClass = classManager.getClass(player);
+
+        if (currentClass != null) {
+
+            String displayName = plugin.getConfig()
+                    .getString(
+                            "classes." + currentClass + ".display-name",
+                            currentClass
+                    );
+
+            player.sendMessage(
+                    color(
+                            "&cCataclysmClass &fKamu sudah memilih class &e"
+                                    + ChatColor.stripColor(
+                                    color(displayName)
+                            )
+                                    + "&f."
+                    )
+            );
+
+            player.closeInventory();
+            return;
         }
 
         var section = plugin.getConfig()
                 .getConfigurationSection("classes");
 
         if (section == null) {
-            return null;
+            return;
         }
 
-        /*
-         * CEK GROUP CLASS SECARA LANGSUNG.
-         *
-         * Tidak menggunakan primaryGroup lagi.
-         */
         for (String id : section.getKeys(false)) {
 
-            String group = plugin.getConfig()
-                    .getString("classes." + id + ".group");
+            String path = "classes." + id;
 
-            if (group == null || group.isEmpty()) {
+            int slot = plugin.getConfig()
+                    .getInt(path + ".slot", -1);
+
+            if (event.getRawSlot() != slot) {
                 continue;
             }
 
-            String groupNode = "group." + group;
-
-            boolean hasClassGroup = user.getNodes()
-                    .stream()
-                    .anyMatch(node ->
-                            node.getKey().equalsIgnoreCase(groupNode)
+            String displayName = plugin.getConfig()
+                    .getString(
+                            path + ".display-name",
+                            id
                     );
 
-            if (hasClassGroup) {
-                return id;
-            }
-        }
+            classManager.setClass(player, id);
 
-        return null;
+            String message = plugin.getConfig()
+                    .getString(
+                            "messages.selected",
+                            "&cCataclysmClass &fBerhasil memilih class &e{class}&f!"
+                    );
+
+            message = message.replace(
+                    "{class}",
+                    ChatColor.stripColor(
+                            color(displayName)
+                    )
+            );
+
+            player.sendMessage(color(message));
+            player.closeInventory();
+
+            return;
+        }
     }
 
-    public boolean hasClass(Player player) {
-        return getClass(player) != null;
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes('&', text);
     }
 }
