@@ -1,0 +1,46 @@
+gui:
+  title: '&8Choose Your Class'
+  filler: WHITE_STAINED_GLASS_PANE
+  bottom: BLACK_STAINED_GLASS_PANE
+  exit: BARRIER
+  fighter: IRON_SWORD
+  ranger: BOW
+  tanker: SHIELD
+  mage: NETHER_STAR
+
+classes:
+  fighter:
+    display-name: '&cFighter'
+    multipliers:
+      fighting: 1.5
+      foraging: 1.5
+      excavation: 1.5
+  ranger:
+    display-name: '&aRanger'
+    multipliers:
+      archery: 1.5
+      fishing: 1.5
+      agility: 1.5
+  tanker:
+    display-name: '&9Tanker'
+    multipliers:
+      defense: 1.5
+      mining: 1.5
+  mage:
+    display-name: '&5Mage'
+    multipliers:
+      farming: 1.5
+      enchanting: 1.5
+      alchemy: 1.5
+
+messages:
+  already-selected: '&cYou have already selected the class &f{class}&c.'
+  selected: '&aYou selected the class &f{class}&a!'
+  no-class: '&cThat player has not selected a class.'
+  reset: '&aClass reset for &f{player}&a.'
+  info: '&7{player} class: {class}'
+  player-not-found: '&cPlayer not found.'
+  player-only: '&cOnly players can use this command.'
+  no-permission: '&cYou do not have permission.'
+  usage: '&cUsage: /classadmin <reset|info|reload> [player]'
+  reloaded: '&aCataclysmClass config reloaded.'
