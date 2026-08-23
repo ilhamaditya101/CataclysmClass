@@ -1,1 +1,35 @@
-package com.cataclysm.classplugin.command;import org.bukkit.command.*;import org.bukkit.entity.Player;import com.cataclysm.classplugin.gui.ClassMenu;import com.cataclysm.classplugin.manager.ClassManager;public class ClassCommand implements CommandExecutor{final ClassMenu m;final ClassManager c;public ClassCommand(ClassMenu m,ClassManager c){this.m=m;this.c=c;}public boolean onCommand(CommandSender s,Command x,String l,String[] a){if(s instanceof Player p){if(c.has(p)){p.sendMessage("§cYou already selected a class.");return true;}m.open(p);}return true;}}
+package com.cataclysm.classplugin.command;
+
+import com.cataclysm.classplugin.gui.ClassMenu;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+public class ClassCommand implements CommandExecutor {
+
+    private final ClassMenu menu;
+
+    public ClassCommand(ClassMenu menu) {
+        this.menu = menu;
+    }
+
+    @Override
+    public boolean onCommand(
+            CommandSender sender,
+            Command command,
+            String label,
+            String[] args
+    ) {
+
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Player only.");
+            return true;
+        }
+
+        menu.open(player);
+
+        return true;
+    }
+}
