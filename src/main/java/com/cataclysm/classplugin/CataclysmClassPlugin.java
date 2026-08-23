@@ -37,19 +37,20 @@ public class CataclysmClassPlugin extends JavaPlugin {
         classManager = new ClassManager(this, luckPerms);
         classMenu = new ClassMenu(this);
 
-        getCommand("class").setExecutor(
-                new ClassCommand(classMenu)
-        );
+        if (getCommand("class") != null) {
+            getCommand("class").setExecutor(
+                    new ClassCommand(classMenu)
+            );
+        }
 
-        getCommand("ccy").setExecutor(
-                new CCYCommand(this)
-        );
+        if (getCommand("cclass") != null) {
+            getCommand("cclass").setExecutor(
+                    new CCYCommand(this)
+            );
+        }
 
         Bukkit.getPluginManager().registerEvents(
-                new ClassMenuListener(
-                        this,
-                        classManager
-                ),
+                new ClassMenuListener(this, classManager),
                 this
         );
 
