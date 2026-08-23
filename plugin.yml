@@ -1,16 +1,13 @@
 name: CataclysmClass
-version: ${version}
+version: 1.0.0
 main: com.cataclysm.classplugin.CataclysmClassPlugin
 api-version: '1.20'
-author: Cataclysm
-softdepend: [AuraSkills]
+depend: [AuraSkills]
 commands:
   class:
-    description: Open the class selection menu
-    usage: /class
+    description: Open class menu
   classadmin:
-    description: Manage player classes
-    usage: /classadmin <reset|info|reload> [player]
+    description: Admin commands
     permission: cataclysmclass.admin
 permissions:
   cataclysmclass.admin:
