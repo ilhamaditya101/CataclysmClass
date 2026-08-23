@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import dev.aurelium.auraskills.api.event.skill.XpGainEvent;
+
 import com.cataclysm.classplugin.manager.ClassManager;
 
 public class XpListener implements Listener {
@@ -24,7 +25,7 @@ public class XpListener implements Listener {
             return;
         }
 
-        String skill = e.getSkill().getKey().toString().toLowerCase(Locale.ROOT);
+        String skill = e.getSkill().getId().toLowerCase(Locale.ROOT);
 
         double m = c.mult(cl, skill);
 
