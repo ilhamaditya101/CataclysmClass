@@ -1,3 +1,113 @@
 package com.cataclysm.classplugin.manager;
-import java.io.File;import org.bukkit.entity.Player;import org.bukkit.configuration.file.YamlConfiguration;import com.cataclysm.classplugin.CataclysmClassPlugin;
-public class ClassManager{private final CataclysmClassPlugin p;private final File f;private YamlConfiguration d;public ClassManager(CataclysmClassPlugin p){this.p=p;f=new File(p.getDataFolder(),"data.yml");d=YamlConfiguration.loadConfiguration(f);}public String get(Player x){return d.getString("players."+x.getUniqueId()+".class");}public boolean has(Player x){return get(x)!=null;}public void set(Player x,String c){d.set("players."+x.getUniqueId()+".class",c);save();}public void reset(Player x){d.set("players."+x.getUniqueId(),null);save();}public void save(){try{d.save(f);}catch(Exception e){p.getLogger().severe(e.getMessage());}}public double mult(String c,String s){return p.getConfig().getDouble("classes."+c+".multipliers."+s,1.0);}public void reload(){d=YamlConfiguration.loadConfiguration(f);}}
+
+import com.cataclysm.classplugin.CataclysmClassPlugin;
+
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.node.Node;
+
+import org.bukkit.entity.Player;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class ClassManager {
+
+    private final CataclysmClassPlugin plugin;
+    private final LuckPerms luckPerms;
+
+    public ClassManager(
+            CataclysmClassPlugin plugin,
+            LuckPerms luckPerms
+    ) {
+        this.plugin = plugin;
+        this.luckPerms = luckPerms;
+    }
+
+    public void setClass(Player player, String classId) {
+
+        String newGroup = plugin.getConfig()
+                .getString("classes." + classId + ".group");
+
+        if (newGroup == null || newGroup.isEmpty()) {
+            return;
+        }
+
+        User user = luckPerms.getUserManager()
+                .getUser(player.getUniqueId());
+
+        if (user == null) {
+            return;
+        }
+
+        Set<String> classGroups = new HashSet<>();
+
+        var section = plugin.getConfig()
+                .getConfigurationSection("classes");
+
+        if (section != null) {
+
+            for (String id : section.getKeys(false)) {
+
+                String group = plugin.getConfig()
+                        .getString("classes." + id + ".group");
+
+                if (group != null && !group.isEmpty()) {
+                    classGroups.add(group);
+                }
+            }
+        }
+
+        /*
+         * Hapus group class lama.
+         */
+        for (String group : classGroups) {
+
+            user.data().remove(
+                    Node.builder("group." + group).build()
+            );
+        }
+
+        /*
+         * Tambahkan group class baru.
+         */
+        user.data().add(
+                Node.builder("group." + newGroup).build()
+        );
+
+        luckPerms.getUserManager().saveUser(user);
+    }
+
+    public String getClass(Player player) {
+
+        User user = luckPerms.getUserManager()
+                .getUser(player.getUniqueId());
+
+        if (user == null) {
+            return null;
+        }
+
+        String primaryGroup = user.getPrimaryGroup();
+
+        var section = plugin.getConfig()
+                .getConfigurationSection("classes");
+
+        if (section == null) {
+            return null;
+        }
+
+        for (String id : section.getKeys(false)) {
+
+            String group = plugin.getConfig()
+                    .getString("classes." + id + ".group");
+
+            if (group != null &&
+                    group.equalsIgnoreCase(primaryGroup)) {
+
+                return id;
+            }
+        }
+
+        return null;
+    }
+}
