@@ -1,1 +1,108 @@
-package com.cataclysm.classplugin.gui;import org.bukkit.*;import org.bukkit.entity.Player;import org.bukkit.event.*;import org.bukkit.event.inventory.InventoryClickEvent;import org.bukkit.inventory.*;import org.bukkit.inventory.meta.ItemMeta;import com.cataclysm.classplugin.manager.ClassManager;public class ClassMenu implements Listener{final ClassManager c;public ClassMenu(ClassManager c){this.c=c;}void put(Inventory i,int s,Material m,String n){ItemStack x=new ItemStack(m);ItemMeta im=x.getItemMeta();im.setDisplayName(n);x.setItemMeta(im);i.setItem(s,x);}public void open(Player p){Inventory i=Bukkit.createInventory(null,36,"§8Choose Class");for(int s=0;s<27;s++)put(i,s,Material.WHITE_STAINED_GLASS_PANE," ");for(int s=27;s<36;s++)put(i,s,Material.BLACK_STAINED_GLASS_PANE," ");put(i,10,Material.IRON_SWORD,"§cFighter");put(i,12,Material.BOW,"§aRanger");put(i,14,Material.SHIELD,"§9Tanker");put(i,16,Material.NETHER_STAR,"§5Mage");put(i,31,Material.BARRIER,"§cExit");p.openInventory(i);}@EventHandler public void click(InventoryClickEvent e){if(!e.getView().getTitle().equals("§8Choose Class"))return;e.setCancelled(true);if(!(e.getWhoClicked() instanceof Player p))return;if(e.getRawSlot()==31){p.closeInventory();return;}String c1=switch(e.getRawSlot()){case 10->"fighter";case 12->"ranger";case 14->"tanker";case 16->"mage";default->null;};if(c1!=null&&!c.has(p)){c.set(p,c1);p.closeInventory();p.sendMessage("§aClass selected: §f"+c1);}}}
+package com.cataclysm.classplugin.gui;
+
+import com.cataclysm.classplugin.CataclysmClassPlugin;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class ClassMenu {
+
+    private final CataclysmClassPlugin plugin;
+
+    public ClassMenu(CataclysmClassPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void open(Player player) {
+
+        String title = color(
+                plugin.getConfig().getString(
+                        "gui.title",
+                        "&8Cataclysm Class"
+                )
+        );
+
+        int size = plugin.getConfig()
+                .getInt("gui.size", 27);
+
+        Inventory inventory = plugin.getServer()
+                .createInventory(null, size, title);
+
+        var section = plugin.getConfig()
+                .getConfigurationSection("classes");
+
+        if (section == null) {
+            player.openInventory(inventory);
+            return;
+        }
+
+        for (String id : section.getKeys(false)) {
+
+            String path = "classes." + id;
+
+            String materialName = plugin.getConfig()
+                    .getString(
+                            path + ".material",
+                            "STONE"
+                    );
+
+            Material material =
+                    Material.matchMaterial(materialName);
+
+            if (material == null) {
+                material = Material.STONE;
+            }
+
+            ItemStack item = new ItemStack(material);
+
+            ItemMeta meta = item.getItemMeta();
+
+            if (meta == null) {
+                continue;
+            }
+
+            String displayName = plugin.getConfig()
+                    .getString(
+                            path + ".display-name",
+                            id
+                    );
+
+            meta.setDisplayName(color(displayName));
+
+            List<String> lore =
+                    plugin.getConfig()
+                            .getStringList(path + ".lore");
+
+            List<String> coloredLore = new ArrayList<>();
+
+            for (String line : lore) {
+                coloredLore.add(color(line));
+            }
+
+            meta.setLore(coloredLore);
+
+            item.setItemMeta(meta);
+
+            int slot = plugin.getConfig()
+                    .getInt(path + ".slot", 0);
+
+            inventory.setItem(slot, item);
+        }
+
+        player.openInventory(inventory);
+    }
+
+    private String color(String text) {
+        return ChatColor.translateAlternateColorCodes(
+                '&',
+                text
+        );
+    }
+}
