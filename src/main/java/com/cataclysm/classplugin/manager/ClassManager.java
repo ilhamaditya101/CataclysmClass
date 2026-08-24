@@ -52,10 +52,6 @@ public final class ClassManager {
         loadData();
     }
 
-    // =========================================================
-    // DATA
-    // =========================================================
-
     private void createDataFile() {
         if (!plugin.getDataFolder().exists()) {
             plugin.getDataFolder().mkdirs();
@@ -126,7 +122,6 @@ public final class ClassManager {
         if (player == null ||
                 classId == null ||
                 classId.isBlank()) {
-
             return false;
         }
 
@@ -137,18 +132,15 @@ public final class ClassManager {
         }
 
         ConfigurationSection classSection =
-                plugin.getConfig()
-                        .getConfigurationSection(
-                                "classes." + classId
-                        );
+                plugin.getConfig().getConfigurationSection(
+                        "classes." + classId
+                );
 
         if (classSection == null) {
             plugin.getLogger().warning(
-                    "Class '" +
-                            classId +
+                    "Class '" + classId +
                             "' tidak ditemukan di config.yml."
             );
-
             return false;
         }
 
@@ -175,15 +167,8 @@ public final class ClassManager {
             addLuckPermsGroup(player, group);
         }
 
-        applyAuraSkillsStats(
-                player,
-                classId
-        );
-
-        executeClassCommands(
-                player,
-                classId
-        );
+        applyAuraSkillsStats(player, classId);
+        executeClassCommands(player, classId);
 
         return true;
     }
@@ -204,18 +189,15 @@ public final class ClassManager {
 
         String oldClass = getClass(uuid);
 
-        if (oldClass == null ||
-                oldClass.isBlank()) {
+        if (oldClass == null || oldClass.isBlank()) {
 
             if (!player.isOnline()) {
-
                 data.set(
                         "players." +
                                 uuid +
                                 ".reset_pending",
                         true
                 );
-
                 saveData();
             }
 
@@ -234,16 +216,13 @@ public final class ClassManager {
             }
         }
 
-        String group =
-                getClassGroup(oldClass);
+        String group = getClassGroup(oldClass);
 
-        if (group != null &&
-                !group.isBlank()) {
+        if (group != null && !group.isBlank()) {
 
             if (player.isOnline()) {
 
-                Player online =
-                        player.getPlayer();
+                Player online = player.getPlayer();
 
                 if (online != null) {
                     removeLuckPermsGroup(
@@ -288,8 +267,7 @@ public final class ClassManager {
             Player player
     ) {
 
-        UUID uuid =
-                player.getUniqueId();
+        UUID uuid = player.getUniqueId();
 
         boolean pending =
                 data.getBoolean(
@@ -303,8 +281,7 @@ public final class ClassManager {
             return;
         }
 
-        String oldClass =
-                getClass(uuid);
+        String oldClass = getClass(uuid);
 
         if (oldClass != null) {
 
@@ -316,9 +293,7 @@ public final class ClassManager {
             String group =
                     getClassGroup(oldClass);
 
-            if (group != null &&
-                    !group.isBlank()) {
-
+            if (group != null && !group.isBlank()) {
                 removeLuckPermsGroup(
                         player,
                         group
@@ -414,4 +389,278 @@ public final class ClassManager {
     ) {
 
         luckPerms.getUserManager()
+                .loadUser(uuid)
+                .thenAccept(user -> {
+
+                    Node node =
+                            Node.builder(
+                                    "group." + group
+                            ).build();
+
+                    user.data().remove(node);
+
+                    saveLuckPermsUser(user);
+                })
+                .exceptionally(error -> {
+
+                    plugin.getLogger().warning(
+                            "Gagal load LuckPerms user " +
+                                    uuid +
+                                    ": " +
+                                    error.getMessage()
+                    );
+
+                    return null;
+                });
+    }
+
+    private void saveLuckPermsUser(
+            User user
+    ) {
+
+        luckPerms.getUserManager()
+                .saveUser(user)
+                .exceptionally(error -> {
+
+                    plugin.getLogger().warning(
+                            "Gagal menyimpan LuckPerms user " +
+                                    user.getUniqueId() +
+                                    ": " +
+                                    error.getMessage()
+                    );
+
+                    return null;
+                });
+    }
+
+    // =========================================================
+    // CLASS GROUP
+    // =========================================================
+
+    public String getClassGroup(
+            String classId
+    ) {
+
+        if (classId == null) {
+            return null;
+        }
+
+        return plugin.getConfig().getString(
+                "classes." +
+                        classId +
+                        ".group"
+        );
+    }
+
+    // =========================================================
+    // AURASKILLS
+    // =========================================================
+
+    private void applyAuraSkillsStats(
+            Player player,
+            String classId
+    ) {
+
+        if (auraSkills == null) {
+            return;
+        }
+
+        ConfigurationSection statsSection =
+                plugin.getConfig()
+                        .getConfigurationSection(
+                                "classes." +
+                                        classId +
+                                        ".stats"
+                        );
+
+        if (statsSection == null) {
+            return;
+        }
+
+        SkillsUser user =
+                auraSkills.getUser(
+                        player.getUniqueId()
+                );
+
+        if (user == null) {
+            plugin.getLogger().warning(
+                    "AuraSkills user tidak ditemukan untuk " +
+                            player.getName()
+            );
+            return;
+        }
+
+        for (String statName :
+                statsSection.getKeys(false)) {
+
+            double value =
+                    statsSection.getDouble(statName);
+
+            if (value == 0) {
+                continue;
+            }
+
+            Stats stat = parseStat(statName);
+
+            if (stat == null) {
+                plugin.getLogger().warning(
+                        "AuraSkills stat tidak dikenal: " +
+                                statName +
+                                " pada class " +
+                                classId
+                );
+                continue;
+            }
+
+            String modifierName =
+                    getModifierName(
+                            classId,
+                            statName
+                    );
+
+            user.removeStatModifier(modifierName);
+
+            user.addStatModifier(
+                    new StatModifier(
+                            modifierName,
+                            stat,
+                            value
+                    )
+            );
+        }
+    }
+
+    private void removeAuraSkillsStats(
+            Player player,
+            String classId
+    ) {
+
+        if (auraSkills == null) {
+            return;
+        }
+
+        ConfigurationSection statsSection =
+                plugin.getConfig()
+                        .getConfigurationSection(
+                                "classes." +
+                                        classId +
+                                        ".stats"
+                        );
+
+        if (statsSection == null) {
+            return;
+        }
+
+        SkillsUser user =
+                auraSkills.getUser(
+                        player.getUniqueId()
+                );
+
+        if (user == null) {
+            return;
+        }
+
+        for (String statName :
+                statsSection.getKeys(false)) {
+
+            String modifierName =
+                    getModifierName(
+                            classId,
+                            statName
+                    );
+
+            user.removeStatModifier(
+                    modifierName
+            );
+        }
+    }
+
+    private String getModifierName(
+            String classId,
+            String statName
+    ) {
+
+        return MODIFIER_PREFIX +
+                classId.toLowerCase(Locale.ROOT) +
+                "." +
+                statName.toLowerCase(Locale.ROOT);
+    }
+
+    private Stats parseStat(
+            String name
+    ) {
+
+        if (name == null) {
+            return null;
+        }
+
+        return switch (
+                name.toLowerCase(Locale.ROOT)
+        ) {
+
+            case "health" ->
+                    Stats.HEALTH;
+
+            case "strength" ->
+                    Stats.STRENGTH;
+
+            case "regeneration" ->
+                    Stats.REGENERATION;
+
+            case "luck" ->
+                    Stats.LUCK;
+
+            case "wisdom" ->
+                    Stats.WISDOM;
+
+            case "toughness" ->
+                    Stats.TOUGHNESS;
+
+            default ->
+                    null;
+        };
+    }
+
+    // =========================================================
+    // COMMANDS
+    // =========================================================
+
+    private void executeClassCommands(
+            Player player,
+            String classId
+    ) {
+
+        List<String> commands =
+                plugin.getConfig().getStringList(
+                        "classes." +
+                                classId +
+                                ".commands"
+                );
+
+        if (commands.isEmpty()) {
+            return;
+        }
+
+        for (String command : commands) {
+
+            if (command == null ||
+                    command.isBlank()) {
+                continue;
+            }
+
+            command = command
+                    .replace(
+                            "{player}",
+                            player.getName()
+                    )
+                    .replace(
+                            "{uuid}",
+                            player.getUniqueId().toString()
+                    )
+                    .replace(
+                            "{class}",
+                            classId
+                    );
+
+            if (command.startsWith("/")) {
                
