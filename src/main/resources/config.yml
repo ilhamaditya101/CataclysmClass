@@ -1,6 +1,11 @@
 gui:
-  title: "&8ᴄᴀᴛᴀᴄʟʏsᴍ ᴄʟᴀss"
+  title: "&x&3&7&7&6&E&2&lᴄ&x&3&6&7&9&C&D&lᴀ&x&3&5&7&C&B&8&lᴛ&x&3&4&7&F&A&3&lᴀ&x&3&4&8&1&8&D&lᴄ&x&3&3&8&4&7&8&lʟ&x&3&2&8&7&6&3&lʏ&x&3&1&8&A&4&E&ls&x&3&3&7&E&6&2&lᴍ &x&3&8&6&6&8&A&lᴄ&x&3&A&5&9&9&F&lʟ&x&3&C&4&D&B&3&lᴀ&x&3&F&4&1&C&7&ls&x&4&1&3&5&D&B&ls"
   size: 27
+  edit-mode-enabled: true
+
+  # Slot di sini bisa diedit melalui /cclass edit.
+  # Slot class (classes.*.slot) selalu dikunci dan tidak bisa diganti.
+  editor-items: {}
 
 classes:
 
@@ -12,11 +17,33 @@ classes:
 
     lore:
       - ""
-      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪɢʜᴛɪɴɢ &e1.𝟻x"
-      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴇxᴄᴀᴠᴀᴛɪᴏɴ &e1.𝟻x"
-      - "&𝟽> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғᴏʀᴀɢɪɴɢ &e1.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪɢʜᴛɪɴɢ &e1.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴇxᴄᴀᴠᴀᴛɪᴏɴ &e1.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғᴏʀᴀɢɪɴɢ &e1.5x"
       - ""
       - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+      - "&8ᴄʟᴀss ʜᴀɴʏᴀ ʙɪsᴀ ᴅɪᴘɪʟɪʜ sᴇᴋᴀʟɪ"
+
+    # Bonus AuraSkills API. Isi sesuka kamu.
+    # Contoh: strength: 10, health: 5, luck: 3
+    stats: {}
+
+    # Alternatif: jalankan command console ketika class dipilih.
+    # Placeholder: {player}, {uuid}
+    stat-commands: []
+
+    # Command lain yang dijalankan setelah class dipilih.
+    commands: []
+
+    # Command kebalikan jika reset. Placeholder: {player}, {uuid}
+    reset-stat-commands: []
+    reset-commands: []
+
+    # Reward item ketika class pertama kali dipilih.
+    # type VANILLA: material + amount
+    # type MMOITEMS: id + mmo-type + amount + command (command bisa diubah sesuai syntax MMOItems kamu)
+    # type COMMAND: command bebas.
+    items: []
 
   ranger:
     display-name: "&aRanger"
@@ -26,11 +53,19 @@ classes:
 
     lore:
       - ""
-      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀʀᴄʜᴇʀʏ &e1.𝟻x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀʀᴄʜᴇʀʏ &e1.5x"
       - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀɢɪʟɪᴛʏ &e1.5x"
-      - "&8> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪsʜɪɴɢ &e1.5x"
+      - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ғɪsʜɪɴɢ &e1.5x"
       - ""
       - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+      - "&8ᴄʟᴀss ʜᴀɴʏᴀ ʙɪsᴀ ᴅɪᴘɪʟɪʜ sᴇᴋᴀʟɪ"
+
+    stats: {}
+    stat-commands: []
+    commands: []
+    reset-stat-commands: []
+    reset-commands: []
+    items: []
 
   tanker:
     display-name: "&bTanker"
@@ -44,6 +79,14 @@ classes:
       - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴍɪɴɪɴɢ &e1.5x"
       - ""
       - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+      - "&8ᴄʟᴀss ʜᴀɴʏᴀ ʙɪsᴀ ᴅɪᴘɪʟɪʜ sᴇᴋᴀʟɪ"
+
+    stats: {}
+    stat-commands: []
+    commands: []
+    reset-stat-commands: []
+    reset-commands: []
+    items: []
 
   mage:
     display-name: "&5Mage"
@@ -58,6 +101,14 @@ classes:
       - "&7> &fʙᴏᴏsᴛ xᴘ sᴋɪʟʟ ᴀʟᴄʜᴇᴍʏ &e1.5x"
       - ""
       - "&eᴋʟɪᴋ ᴜɴᴛᴜᴋ ᴍᴇᴍɪʟɪʜ ᴄʟᴀss"
+      - "&8ᴄʟᴀss ʜᴀɴʏᴀ ʙɪsᴀ ᴅɪᴘɪʟɪʜ sᴇᴋᴀʟɪ"
+
+    stats: {}
+    stat-commands: []
+    commands: []
+    reset-stat-commands: []
+    reset-commands: []
+    items: []
 
 messages:
   selected: "&cCataclysmClass &fBerhasil memilih class &e{class}&f!"
