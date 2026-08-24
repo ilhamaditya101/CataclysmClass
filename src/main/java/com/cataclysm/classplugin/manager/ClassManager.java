@@ -2,8 +2,8 @@ package com.cataclysm.classplugin.manager;
 
 import com.cataclysm.classplugin.CataclysmClassPlugin;
 import dev.aurelium.auraskills.api.AuraSkillsApi;
-import dev.aurelium.auraskills.api.stat.Stats;
 import dev.aurelium.auraskills.api.stat.StatModifier;
+import dev.aurelium.auraskills.api.stat.Stats;
 import dev.aurelium.auraskills.api.user.SkillsUser;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.user.User;
@@ -17,7 +17,11 @@ import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 public final class ClassManager {
 
@@ -39,7 +43,10 @@ public final class ClassManager {
         this.luckPerms = luckPerms;
         this.auraSkills = auraSkills;
 
-        this.dataFile = new File(plugin.getDataFolder(), "players.yml");
+        this.dataFile = new File(
+                plugin.getDataFolder(),
+                "players.yml"
+        );
 
         createDataFile();
         loadData();
@@ -59,7 +66,8 @@ public final class ClassManager {
                 dataFile.createNewFile();
             } catch (IOException e) {
                 plugin.getLogger().severe(
-                        "Gagal membuat players.yml: " + e.getMessage()
+                        "Gagal membuat players.yml: " +
+                                e.getMessage()
                 );
             }
         }
@@ -74,7 +82,8 @@ public final class ClassManager {
             data.save(dataFile);
         } catch (IOException e) {
             plugin.getLogger().severe(
-                    "Gagal menyimpan players.yml: " + e.getMessage()
+                    "Gagal menyimpan players.yml: " +
+                            e.getMessage()
             );
         }
     }
@@ -92,7 +101,9 @@ public final class ClassManager {
     }
 
     public String getClass(UUID uuid) {
-        return data.getString("players." + uuid + ".class");
+        return data.getString(
+                "players." + uuid + ".class"
+        );
     }
 
     public boolean hasClass(Player player) {
@@ -107,9 +118,15 @@ public final class ClassManager {
     // SET CLASS
     // =========================================================
 
-    public boolean setClass(Player player, String classId) {
+    public boolean setClass(
+            Player player,
+            String classId
+    ) {
 
-        if (player == null || classId == null || classId.isBlank()) {
+        if (player == null ||
+                classId == null ||
+                classId.isBlank()) {
+
             return false;
         }
 
@@ -120,37 +137,53 @@ public final class ClassManager {
         }
 
         ConfigurationSection classSection =
-                plugin.getConfig().getConfigurationSection(
-                        "classes." + classId
-                );
+                plugin.getConfig()
+                        .getConfigurationSection(
+                                "classes." + classId
+                        );
 
         if (classSection == null) {
             plugin.getLogger().warning(
-                    "Class '" + classId + "' tidak ditemukan di config.yml."
+                    "Class '" +
+                            classId +
+                            "' tidak ditemukan di config.yml."
             );
+
             return false;
         }
 
         data.set(
-                "players." + player.getUniqueId() + ".class",
+                "players." +
+                        player.getUniqueId() +
+                        ".class",
                 classId
         );
 
         data.set(
-                "players." + player.getUniqueId() + ".reset_pending",
+                "players." +
+                        player.getUniqueId() +
+                        ".reset_pending",
                 false
         );
 
         saveData();
 
-        String group = classSection.getString("group");
+        String group =
+                classSection.getString("group");
 
         if (group != null && !group.isBlank()) {
             addLuckPermsGroup(player, group);
         }
 
-        applyAuraSkillsStats(player, classId);
-        executeClassCommands(player, classId);
+        applyAuraSkillsStats(
+                player,
+                classId
+        );
+
+        executeClassCommands(
+                player,
+                classId
+        );
 
         return true;
     }
@@ -159,7 +192,9 @@ public final class ClassManager {
     // RESET CLASS
     // =========================================================
 
-    public boolean resetClass(OfflinePlayer player) {
+    public boolean resetClass(
+            OfflinePlayer player
+    ) {
 
         if (player == null) {
             return false;
@@ -169,13 +204,18 @@ public final class ClassManager {
 
         String oldClass = getClass(uuid);
 
-        if (oldClass == null || oldClass.isBlank()) {
+        if (oldClass == null ||
+                oldClass.isBlank()) {
 
             if (!player.isOnline()) {
+
                 data.set(
-                        "players." + uuid + ".reset_pending",
+                        "players." +
+                                uuid +
+                                ".reset_pending",
                         true
                 );
+
                 saveData();
             }
 
@@ -183,38 +223,55 @@ public final class ClassManager {
         }
 
         if (player.isOnline()) {
+
             Player online = player.getPlayer();
 
             if (online != null) {
-                removeAuraSkillsStats(online, oldClass);
+                removeAuraSkillsStats(
+                        online,
+                        oldClass
+                );
             }
         }
 
-        String group = getClassGroup(oldClass);
+        String group =
+                getClassGroup(oldClass);
 
-        if (group != null && !group.isBlank()) {
+        if (group != null &&
+                !group.isBlank()) {
 
             if (player.isOnline()) {
 
-                Player online = player.getPlayer();
+                Player online =
+                        player.getPlayer();
 
                 if (online != null) {
-                    removeLuckPermsGroup(online, group);
+                    removeLuckPermsGroup(
+                            online,
+                            group
+                    );
                 }
 
             } else {
 
-                removeLuckPermsGroupOffline(uuid, group);
+                removeLuckPermsGroupOffline(
+                        uuid,
+                        group
+                );
             }
         }
 
         data.set(
-                "players." + uuid + ".class",
+                "players." +
+                        uuid +
+                        ".class",
                 null
         );
 
         data.set(
-                "players." + uuid + ".reset_pending",
+                "players." +
+                        uuid +
+                        ".reset_pending",
                 false
         );
 
@@ -227,38 +284,59 @@ public final class ClassManager {
     // PENDING RESET
     // =========================================================
 
-    public void handlePendingReset(Player player) {
+    public void handlePendingReset(
+            Player player
+    ) {
 
-        UUID uuid = player.getUniqueId();
+        UUID uuid =
+                player.getUniqueId();
 
-        boolean pending = data.getBoolean(
-                "players." + uuid + ".reset_pending",
-                false
-        );
+        boolean pending =
+                data.getBoolean(
+                        "players." +
+                                uuid +
+                                ".reset_pending",
+                        false
+                );
 
         if (!pending) {
             return;
         }
 
-        String oldClass = getClass(uuid);
+        String oldClass =
+                getClass(uuid);
 
         if (oldClass != null) {
-            removeAuraSkillsStats(player, oldClass);
 
-            String group = getClassGroup(oldClass);
+            removeAuraSkillsStats(
+                    player,
+                    oldClass
+            );
 
-            if (group != null && !group.isBlank()) {
-                removeLuckPermsGroup(player, group);
+            String group =
+                    getClassGroup(oldClass);
+
+            if (group != null &&
+                    !group.isBlank()) {
+
+                removeLuckPermsGroup(
+                        player,
+                        group
+                );
             }
         }
 
         data.set(
-                "players." + uuid + ".class",
+                "players." +
+                        uuid +
+                        ".class",
                 null
         );
 
         data.set(
-                "players." + uuid + ".reset_pending",
+                "players." +
+                        uuid +
+                        ".reset_pending",
                 false
         );
 
@@ -269,14 +347,71 @@ public final class ClassManager {
     // LUCKPERMS
     // =========================================================
 
-    private void addLuckPermsGroup(Player player, String group) {
+    private void addLuckPermsGroup(
+            Player player,
+            String group
+    ) {
 
         User user =
-                luckPerms.getPlayerAdapter(Player.class).getUser(player);
+                luckPerms
+                        .getPlayerAdapter(Player.class)
+                        .getUser(player);
 
         if (user == null) {
             return;
         }
 
-        if (!user.getInheritedGroups(user.getQueryOptions())
-                .
+        boolean alreadyHasGroup =
+                user.getInheritedGroups(
+                                user.getQueryOptions()
+                        )
+                        .stream()
+                        .anyMatch(
+                                g -> g.getName()
+                                        .equalsIgnoreCase(group)
+                        );
+
+        if (!alreadyHasGroup) {
+
+            Node node =
+                    Node.builder(
+                            "group." + group
+                    ).build();
+
+            user.data().add(node);
+
+            saveLuckPermsUser(user);
+        }
+    }
+
+    private void removeLuckPermsGroup(
+            Player player,
+            String group
+    ) {
+
+        User user =
+                luckPerms
+                        .getPlayerAdapter(Player.class)
+                        .getUser(player);
+
+        if (user == null) {
+            return;
+        }
+
+        Node node =
+                Node.builder(
+                        "group." + group
+                ).build();
+
+        user.data().remove(node);
+
+        saveLuckPermsUser(user);
+    }
+
+    private void removeLuckPermsGroupOffline(
+            UUID uuid,
+            String group
+    ) {
+
+        luckPerms.getUserManager()
+               
