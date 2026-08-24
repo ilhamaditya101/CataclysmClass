@@ -62,8 +62,7 @@ public final class ClassManager {
                 dataFile.createNewFile();
             } catch (IOException e) {
                 plugin.getLogger().severe(
-                        "Gagal membuat players.yml: " +
-                                e.getMessage()
+                        "Gagal membuat players.yml: " + e.getMessage()
                 );
             }
         }
@@ -78,15 +77,10 @@ public final class ClassManager {
             data.save(dataFile);
         } catch (IOException e) {
             plugin.getLogger().severe(
-                    "Gagal menyimpan players.yml: " +
-                            e.getMessage()
+                    "Gagal menyimpan players.yml: " + e.getMessage()
             );
         }
     }
-
-    // =========================================================
-    // GET CLASS
-    // =========================================================
 
     public String getClass(Player player) {
         return getClass(player.getUniqueId());
@@ -97,9 +91,7 @@ public final class ClassManager {
     }
 
     public String getClass(UUID uuid) {
-        return data.getString(
-                "players." + uuid + ".class"
-        );
+        return data.getString("players." + uuid + ".class");
     }
 
     public boolean hasClass(Player player) {
@@ -110,18 +102,9 @@ public final class ClassManager {
         return getClass(player) != null;
     }
 
-    // =========================================================
-    // SET CLASS
-    // =========================================================
+    public boolean setClass(Player player, String classId) {
 
-    public boolean setClass(
-            Player player,
-            String classId
-    ) {
-
-        if (player == null ||
-                classId == null ||
-                classId.isBlank()) {
+        if (player == null || classId == null || classId.isBlank()) {
             return false;
         }
 
@@ -131,12 +114,12 @@ public final class ClassManager {
             return false;
         }
 
-        ConfigurationSection classSection =
+        ConfigurationSection section =
                 plugin.getConfig().getConfigurationSection(
                         "classes." + classId
                 );
 
-        if (classSection == null) {
+        if (section == null) {
             plugin.getLogger().warning(
                     "Class '" + classId +
                             "' tidak ditemukan di config.yml."
@@ -145,23 +128,18 @@ public final class ClassManager {
         }
 
         data.set(
-                "players." +
-                        player.getUniqueId() +
-                        ".class",
+                "players." + player.getUniqueId() + ".class",
                 classId
         );
 
         data.set(
-                "players." +
-                        player.getUniqueId() +
-                        ".reset_pending",
+                "players." + player.getUniqueId() + ".reset_pending",
                 false
         );
 
         saveData();
 
-        String group =
-                classSection.getString("group");
+        String group = section.getString("group");
 
         if (group != null && !group.isBlank()) {
             addLuckPermsGroup(player, group);
@@ -173,29 +151,19 @@ public final class ClassManager {
         return true;
     }
 
-    // =========================================================
-    // RESET CLASS
-    // =========================================================
-
-    public boolean resetClass(
-            OfflinePlayer player
-    ) {
+    public boolean resetClass(OfflinePlayer player) {
 
         if (player == null) {
             return false;
         }
 
         UUID uuid = player.getUniqueId();
-
         String oldClass = getClass(uuid);
 
         if (oldClass == null || oldClass.isBlank()) {
-
             if (!player.isOnline()) {
                 data.set(
-                        "players." +
-                                uuid +
-                                ".reset_pending",
+                        "players." + uuid + ".reset_pending",
                         true
                 );
                 saveData();
@@ -205,14 +173,10 @@ public final class ClassManager {
         }
 
         if (player.isOnline()) {
-
             Player online = player.getPlayer();
 
             if (online != null) {
-                removeAuraSkillsStats(
-                        online,
-                        oldClass
-                );
+                removeAuraSkillsStats(online, oldClass);
             }
         }
 
@@ -221,36 +185,23 @@ public final class ClassManager {
         if (group != null && !group.isBlank()) {
 
             if (player.isOnline()) {
-
                 Player online = player.getPlayer();
 
                 if (online != null) {
-                    removeLuckPermsGroup(
-                            online,
-                            group
-                    );
+                    removeLuckPermsGroup(online, group);
                 }
-
             } else {
-
-                removeLuckPermsGroupOffline(
-                        uuid,
-                        group
-                );
+                removeLuckPermsGroupOffline(uuid, group);
             }
         }
 
         data.set(
-                "players." +
-                        uuid +
-                        ".class",
+                "players." + uuid + ".class",
                 null
         );
 
         data.set(
-                "players." +
-                        uuid +
-                        ".reset_pending",
+                "players." + uuid + ".reset_pending",
                 false
         );
 
@@ -259,23 +210,14 @@ public final class ClassManager {
         return true;
     }
 
-    // =========================================================
-    // PENDING RESET
-    // =========================================================
-
-    public void handlePendingReset(
-            Player player
-    ) {
+    public void handlePendingReset(Player player) {
 
         UUID uuid = player.getUniqueId();
 
-        boolean pending =
-                data.getBoolean(
-                        "players." +
-                                uuid +
-                                ".reset_pending",
-                        false
-                );
+        boolean pending = data.getBoolean(
+                "players." + uuid + ".reset_pending",
+                false
+        );
 
         if (!pending) {
             return;
@@ -284,43 +226,27 @@ public final class ClassManager {
         String oldClass = getClass(uuid);
 
         if (oldClass != null) {
+            removeAuraSkillsStats(player, oldClass);
 
-            removeAuraSkillsStats(
-                    player,
-                    oldClass
-            );
-
-            String group =
-                    getClassGroup(oldClass);
+            String group = getClassGroup(oldClass);
 
             if (group != null && !group.isBlank()) {
-                removeLuckPermsGroup(
-                        player,
-                        group
-                );
+                removeLuckPermsGroup(player, group);
             }
         }
 
         data.set(
-                "players." +
-                        uuid +
-                        ".class",
+                "players." + uuid + ".class",
                 null
         );
 
         data.set(
-                "players." +
-                        uuid +
-                        ".reset_pending",
+                "players." + uuid + ".reset_pending",
                 false
         );
 
         saveData();
     }
-
-    // =========================================================
-    // LUCKPERMS
-    // =========================================================
 
     private void addLuckPermsGroup(
             Player player,
@@ -328,33 +254,26 @@ public final class ClassManager {
     ) {
 
         User user =
-                luckPerms
-                        .getPlayerAdapter(Player.class)
+                luckPerms.getPlayerAdapter(Player.class)
                         .getUser(player);
 
         if (user == null) {
             return;
         }
 
-        boolean alreadyHasGroup =
-                user.getInheritedGroups(
-                                user.getQueryOptions()
-                        )
+        boolean exists =
+                user.getInheritedGroups(user.getQueryOptions())
                         .stream()
                         .anyMatch(
                                 g -> g.getName()
                                         .equalsIgnoreCase(group)
                         );
 
-        if (!alreadyHasGroup) {
-
+        if (!exists) {
             Node node =
-                    Node.builder(
-                            "group." + group
-                    ).build();
+                    Node.builder("group." + group).build();
 
             user.data().add(node);
-
             saveLuckPermsUser(user);
         }
     }
@@ -365,8 +284,7 @@ public final class ClassManager {
     ) {
 
         User user =
-                luckPerms
-                        .getPlayerAdapter(Player.class)
+                luckPerms.getPlayerAdapter(Player.class)
                         .getUser(player);
 
         if (user == null) {
@@ -374,12 +292,9 @@ public final class ClassManager {
         }
 
         Node node =
-                Node.builder(
-                        "group." + group
-                ).build();
+                Node.builder("group." + group).build();
 
         user.data().remove(node);
-
         saveLuckPermsUser(user);
     }
 
@@ -393,20 +308,16 @@ public final class ClassManager {
                 .thenAccept(user -> {
 
                     Node node =
-                            Node.builder(
-                                    "group." + group
-                            ).build();
+                            Node.builder("group." + group).build();
 
                     user.data().remove(node);
-
                     saveLuckPermsUser(user);
                 })
                 .exceptionally(error -> {
 
                     plugin.getLogger().warning(
                             "Gagal load LuckPerms user " +
-                                    uuid +
-                                    ": " +
+                                    uuid + ": " +
                                     error.getMessage()
                     );
 
@@ -414,9 +325,7 @@ public final class ClassManager {
                 });
     }
 
-    private void saveLuckPermsUser(
-            User user
-    ) {
+    private void saveLuckPermsUser(User user) {
 
         luckPerms.getUserManager()
                 .saveUser(user)
@@ -424,8 +333,7 @@ public final class ClassManager {
 
                     plugin.getLogger().warning(
                             "Gagal menyimpan LuckPerms user " +
-                                    user.getUniqueId() +
-                                    ": " +
+                                    user.getUniqueId() + ": " +
                                     error.getMessage()
                     );
 
@@ -433,28 +341,16 @@ public final class ClassManager {
                 });
     }
 
-    // =========================================================
-    // CLASS GROUP
-    // =========================================================
-
-    public String getClassGroup(
-            String classId
-    ) {
+    public String getClassGroup(String classId) {
 
         if (classId == null) {
             return null;
         }
 
         return plugin.getConfig().getString(
-                "classes." +
-                        classId +
-                        ".group"
+                "classes." + classId + ".group"
         );
     }
-
-    // =========================================================
-    // AURASKILLS
-    // =========================================================
 
     private void applyAuraSkillsStats(
             Player player,
@@ -465,22 +361,17 @@ public final class ClassManager {
             return;
         }
 
-        ConfigurationSection statsSection =
-                plugin.getConfig()
-                        .getConfigurationSection(
-                                "classes." +
-                                        classId +
-                                        ".stats"
-                        );
+        ConfigurationSection stats =
+                plugin.getConfig().getConfigurationSection(
+                        "classes." + classId + ".stats"
+                );
 
-        if (statsSection == null) {
+        if (stats == null) {
             return;
         }
 
         SkillsUser user =
-                auraSkills.getUser(
-                        player.getUniqueId()
-                );
+                auraSkills.getUser(player.getUniqueId());
 
         if (user == null) {
             plugin.getLogger().warning(
@@ -490,11 +381,9 @@ public final class ClassManager {
             return;
         }
 
-        for (String statName :
-                statsSection.getKeys(false)) {
+        for (String statName : stats.getKeys(false)) {
 
-            double value =
-                    statsSection.getDouble(statName);
+            double value = stats.getDouble(statName);
 
             if (value == 0) {
                 continue;
@@ -505,18 +394,13 @@ public final class ClassManager {
             if (stat == null) {
                 plugin.getLogger().warning(
                         "AuraSkills stat tidak dikenal: " +
-                                statName +
-                                " pada class " +
-                                classId
+                                statName
                 );
                 continue;
             }
 
             String modifierName =
-                    getModifierName(
-                            classId,
-                            statName
-                    );
+                    getModifierName(classId, statName);
 
             user.removeStatModifier(modifierName);
 
@@ -539,39 +423,28 @@ public final class ClassManager {
             return;
         }
 
-        ConfigurationSection statsSection =
-                plugin.getConfig()
-                        .getConfigurationSection(
-                                "classes." +
-                                        classId +
-                                        ".stats"
-                        );
+        ConfigurationSection stats =
+                plugin.getConfig().getConfigurationSection(
+                        "classes." + classId + ".stats"
+                );
 
-        if (statsSection == null) {
+        if (stats == null) {
             return;
         }
 
         SkillsUser user =
-                auraSkills.getUser(
-                        player.getUniqueId()
-                );
+                auraSkills.getUser(player.getUniqueId());
 
         if (user == null) {
             return;
         }
 
-        for (String statName :
-                statsSection.getKeys(false)) {
+        for (String statName : stats.getKeys(false)) {
 
             String modifierName =
-                    getModifierName(
-                            classId,
-                            statName
-                    );
+                    getModifierName(classId, statName);
 
-            user.removeStatModifier(
-                    modifierName
-            );
+            user.removeStatModifier(modifierName);
         }
     }
 
@@ -586,44 +459,36 @@ public final class ClassManager {
                 statName.toLowerCase(Locale.ROOT);
     }
 
-    private Stats parseStat(
-            String name
-    ) {
+    private Stats parseStat(String name) {
 
         if (name == null) {
             return null;
         }
 
-        return switch (
-                name.toLowerCase(Locale.ROOT)
-        ) {
+        switch (name.toLowerCase(Locale.ROOT)) {
 
-            case "health" ->
-                    Stats.HEALTH;
+            case "health":
+                return Stats.HEALTH;
 
-            case "strength" ->
-                    Stats.STRENGTH;
+            case "strength":
+                return Stats.STRENGTH;
 
-            case "regeneration" ->
-                    Stats.REGENERATION;
+            case "regeneration":
+                return Stats.REGENERATION;
 
-            case "luck" ->
-                    Stats.LUCK;
+            case "luck":
+                return Stats.LUCK;
 
-            case "wisdom" ->
-                    Stats.WISDOM;
+            case "wisdom":
+                return Stats.WISDOM;
 
-            case "toughness" ->
-                    Stats.TOUGHNESS;
+            case "toughness":
+                return Stats.TOUGHNESS;
 
-            default ->
-                    null;
-        };
+            default:
+                return null;
+        }
     }
-
-    // =========================================================
-    // COMMANDS
-    // =========================================================
 
     private void executeClassCommands(
             Player player,
@@ -632,9 +497,7 @@ public final class ClassManager {
 
         List<String> commands =
                 plugin.getConfig().getStringList(
-                        "classes." +
-                                classId +
-                                ".commands"
+                        "classes." + classId + ".commands"
                 );
 
         if (commands.isEmpty()) {
@@ -643,24 +506,56 @@ public final class ClassManager {
 
         for (String command : commands) {
 
-            if (command == null ||
-                    command.isBlank()) {
+            if (command == null || command.isBlank()) {
                 continue;
             }
 
             command = command
-                    .replace(
-                            "{player}",
-                            player.getName()
-                    )
+                    .replace("{player}", player.getName())
                     .replace(
                             "{uuid}",
                             player.getUniqueId().toString()
                     )
-                    .replace(
-                            "{class}",
-                            classId
-                    );
+                    .replace("{class}", classId);
 
             if (command.startsWith("/")) {
-               
+                command = command.substring(1);
+            }
+
+            Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    command
+            );
+        }
+    }
+
+    public void reload() {
+        loadData();
+    }
+
+    public boolean classExists(String classId) {
+
+        if (classId == null) {
+            return false;
+        }
+
+        return plugin.getConfig()
+                .getConfigurationSection(
+                        "classes." +
+                                classId.toLowerCase(Locale.ROOT)
+                ) != null;
+    }
+
+    public Set<String> getClassIds() {
+
+        ConfigurationSection section =
+                plugin.getConfig()
+                        .getConfigurationSection("classes");
+
+        if (section == null) {
+            return Collections.emptySet();
+        }
+
+        return section.getKeys(false);
+    }
+}               
